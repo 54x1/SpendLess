@@ -107,7 +107,7 @@
                 <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
                     <!-- Header -->
                     <header class="bg-white shadow-sm border-b border-gray-200">
-                        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                       <main class="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8">
                             <div class="flex items-center justify-between">
                                 <h1 class="text-2xl font-bold text-gray-900">
                                     <i class="fas fa-chart-pie text-indigo-600 mr-2"></i>
@@ -233,7 +233,7 @@
                                                     <i :class="getCategoryById(expense.categoryId).icon"></i>
                                                 </div>
                                                 <div class="flex-1">
-                                                    <h4 class="font-medium text-gray-900 group-hover:text-indigo-600 transition-colors">{{ expense.description }}</h4>
+                                                    <h4 class="font-medium text-gray-900 group-hover:text-indigo-600 transition-colors truncate w-full max-w-[180px] sm:max-w-none">{{ expense.description }}</h4>
                                                     <p class="text-sm text-gray-500">{{ getCategoryById(expense.categoryId).name }} • {{ formatDate(expense.date) }}</p>
                                                 </div>
                                             </div>
@@ -281,7 +281,7 @@
                                         <!-- Basic Information -->
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                                                     Description
                                                 </label>
                                                 <input 
@@ -293,7 +293,7 @@
                                                 >
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                                                    Budget Amount
                                                 </label>
                                                 <div class="relative">
@@ -316,7 +316,7 @@
                                             <label class="block text-sm font-medium text-gray-700 mb-3">
                                                 Primary Category
                                             </label>
-                                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                                            <div class="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                                                 <button
                                                     v-for="category in categories"
                                                     :key="category.id"
@@ -417,7 +417,7 @@
                                         </div>
 
                                         <!-- Submit Button -->
-                                        <div class="flex space-x-4">
+                                        <div class="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0">
                                             <button 
                                                 type="submit"
                                                 class="flex-1 bg-indigo-600 text-white py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors font-medium"
@@ -606,7 +606,7 @@
                                 <div v-if="editingExpense" class="space-y-6">
                                     <!-- Description -->
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Description</label>
                                         <input 
                                             v-model="editingExpense.description"
                                             type="text" 
@@ -617,7 +617,7 @@
 
                                     <!-- Amount -->
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Budget Amount</label>
+                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Budget Amount</label>
                                         <div class="relative">
                                             <span class="absolute left-3 top-2 text-gray-500">$</span>
                                             <input 
