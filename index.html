@@ -362,7 +362,7 @@
                                                             <input 
                                                                 v-model.number="newExpense.ratings[category.id]"
                                                                 type="number" 
-                                                                min="0" 
+                                                                min="1" 
                                                                 max="5" 
                                                                 class="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                                             >
@@ -370,7 +370,7 @@
                                                     </div>
                                                     <div class="flex justify-center space-x-2">
                                                         <button
-                                                            v-for="rating in [0,1,2,3,4,5]"
+                                                            v-for="rating in [1,2,3,4,5]"
                                                             :key="rating"
                                                             type="button"
                                                             @click="newExpense.ratings[category.id] = rating"
@@ -782,7 +782,7 @@
                 const initializeRatings = () => {
                     const ratings = {};
                     categories.value.forEach(cat => {
-                        ratings[cat.id] = 0;
+                        ratings[cat.id] = 1;
                     });
                     newExpense.value.ratings = ratings;
                 };
@@ -844,14 +844,16 @@
                 };
 
                 const getRatingColor = (rating) => {
-                    const colors = {
-                        0: '#6b7280', // gray for 0 (doesn't fit category)
-                        1: '#ef4444', // red for 1 (very low)
-                        2: '#f97316', // orange for 2 (low)
-                        3: '#eab308', // yellow for 3 (moderate)
-                        4: '#22c55e', // green for 4 (high)
-                        5: '#10b981'  // emerald for 5 (excellent)
-                    };
+    const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#10b981']; // 1-5
+    return colors[rating - 1] || '#6b7280'; // fallback gray
+                    // const colors = {
+                    //     0: '#6b7280', // gray for 0 (doesn't fit category)
+                    //     1: '#ef4444', // red for 1 (very low)
+                    //     2: '#f97316', // orange for 2 (low)
+                    //     3: '#eab308', // yellow for 3 (moderate)
+                    //     4: '#22c55e', // green for 4 (high)
+                    //     5: '#10b981'  // emerald for 5 (excellent)
+                    // };
                     return colors[rating] || colors[0];
                 };
 
@@ -952,10 +954,17 @@ const expense = {
                 };
 
                 const loadFromLocalStorage = () => {
-                    const saved = localStorage.getItem('familySpendingData');
-                    if (saved) {
-                        expenses.value = JSON.parse(saved);
-                    }
+                    // const saved = localStorage.getItem('familySpendingData');
+                    // if (saved) {
+                    //     expenses.value = JSON.parse(saved);
+                    // }
+                        try {
+        const saved = localStorage.getItem('familySpendingData');
+        if (saved) expenses.value = JSON.parse(saved);
+    } catch (e) {
+        console.error('Failed to load data from localStorage:', e);
+        expenses.value = [];
+    }
                 };
 
                 // Lifecycle
