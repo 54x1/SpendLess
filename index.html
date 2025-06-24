@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rate Spending Less Tracker</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .category-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .category-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+        }
+        .rating-slider {
+            background: linear-gradient(to right, #ef4444 0%, #f97316 25%, #eab308 50%, #22c55e 75%, #10b981 100%);
+        }
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.3s ease;
+        }
+        .fade-enter-from, .fade-leave-to {
+            opacity: 0;
+        }
+        .rating-button {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .rating-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .rating-button.selected {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+        .category-selector {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .category-selector:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+        .category-selector.selected {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+        .expense-item {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .expense-item:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+        .action-button {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .action-button:hover {
+            transform: scale(1.05);
+        }
+        .edit-button:hover {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .delete-button:hover {
+            background-color: #ef4444;
+            color: white;
+        }
+        .modal-backdrop {
+            backdrop-filter: blur(4px);
+            transition: all 0.3s ease;
+        }
+        .modal-content {
+            animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div id="app">
+        <family-spending-tracker></family-spending-tracker>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, onMounted, watch } = Vue;
+
+        const FamilySpendingTracker = {
+            template: `
+                <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+                    <!-- Header -->
+                    <header class="bg-white shadow-sm border-b border-gray-200">
+                        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                            <div class="flex items-center justify-between">
+                                <h1 class="text-2xl font-bold text-gray-900">
+                                    <i class="fas fa-chart-pie text-indigo-600 mr-2"></i>
+                                    Rate Spending Less Tracker
+                                </h1>
+                                <div class="flex space-x-2">
+                                    <button 
+  @click="currentView = 'dashboard'"
+  :class="[
+    'px-4 py-2 rounded-lg font-medium transition-all',
+    currentView === 'dashboard' 
+      ? 'bg-indigo-600 text-white shadow-md ring-2 ring-indigo-400' 
+      : 'bg-gray-100 text-gray-700 hover:bg-indigo-100 hover:text-indigo-700'
+  ]"
+>
+  <i class="fas fa-tachometer-alt mr-1"></i>
+  Dashboard
+</button>
+
+<button 
+  @click="currentView = 'add'"
+  :class="[
+    'px-4 py-2 rounded-lg font-medium transition-all',
+    currentView === 'add' 
+      ? 'bg-indigo-600 text-white shadow-md ring-2 ring-indigo-400' 
+      : 'bg-gray-100 text-gray-700 hover:bg-indigo-100 hover:text-indigo-700'
+  ]"
+>
+  <i class="fas fa-plus mr-1"></i>
+  Add Expense
+</button>
+
+<button 
+  @click="currentView = 'analytics'"
+  :class="[
+    'px-4 py-2 rounded-lg font-medium transition-all',
+    currentView === 'analytics' 
+      ? 'bg-indigo-600 text-white shadow-md ring-2 ring-indigo-400' 
+      : 'bg-gray-100 text-gray-700 hover:bg-indigo-100 hover:text-indigo-700'
+  ]"
+>
+  <i class="fas fa-chart-bar mr-1"></i>
+  Analytics
+</button>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <!-- Main Content -->
+                    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                        <!-- Dashboard View -->
+                        <transition name="fade" mode="out-in">
+                            <div v-if="currentView === 'dashboard'" key="dashboard">
+                                <!-- Categories Overview -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
+                                    <div 
+                                        v-for="category in categories" 
+                                        :key="category.id"
+                                        class="category-card bg-white rounded-xl p-6 shadow-md border-l-4"
+                                        :style="{ borderLeftColor: category.color }"
+                                    >
+                                        <div class="flex items-center justify-between mb-4">
+                                            <div class="flex items-center">
+                                                <div 
+                                                    class="w-12 h-12 rounded-lg flex items-center justify-center text-white text-xl"
+                                                    :style="{ backgroundColor: category.color }"
+                                                >
+                                                    <i :class="category.icon"></i>
+                                                </div>
+                                                <div class="ml-3">
+                                                    <h3 class="font-semibold text-gray-900">{{ category.name }}</h3>
+                                                    <p class="text-sm text-gray-500">{{ getCategoryExpenseCount(category.id) }} expenses</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="space-y-2">
+                                            <div class="flex justify-between text-sm">
+                                                <span class="text-gray-600">Total Spent</span>
+                                                <span class="font-semibold text-gray-900">\${{ getCategoryTotal(category.id).toFixed(2) }}</span>
+                                            </div>
+                                            <div class="flex justify-between text-sm">
+                                                <span class="text-gray-600">Avg Rating</span>
+                                                <span class="font-semibold" :style="{ color: category.color }">
+                                                    {{ getCategoryAverageRating(category.id) }}/5
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Recent Expenses -->
+                                <div class="bg-white rounded-xl shadow-md p-6">
+                                    <div class="flex items-center justify-between mb-6">
+                                        <h2 class="text-xl font-semibold text-gray-900">
+                                            <i class="fas fa-clock text-indigo-600 mr-2"></i>
+                                            Recent Expenses
+                                        </h2>
+                                        <button 
+                                            @click="currentView = 'add'"
+                                            class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+                                        >
+                                            <i class="fas fa-plus mr-1"></i>
+                                            Add New
+                                        </button>
+                                    </div>
+                                    <div v-if="recentExpenses.length === 0" class="text-center py-8 text-gray-500">
+                                        <i class="fas fa-inbox text-4xl mb-4"></i>
+                                        <p>No expenses recorded yet. Start by adding your first expense!</p>
+                                    </div>
+                                    <div v-else class="space-y-4">
+                                        <div 
+                                            v-for="expense in recentExpenses" 
+                                            :key="expense.id"
+                                            class="expense-item flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 group"
+                                        >
+                                            <div class="flex items-center flex-1">
+                                                <div 
+                                                    class="w-10 h-10 rounded-lg flex items-center justify-center text-white mr-3 transition-transform group-hover:scale-110"
+                                                    :style="{ backgroundColor: getCategoryById(expense.categoryId).color }"
+                                                >
+                                                    <i :class="getCategoryById(expense.categoryId).icon"></i>
+                                                </div>
+                                                <div class="flex-1">
+                                                    <h4 class="font-medium text-gray-900 group-hover:text-indigo-600 transition-colors">{{ expense.description }}</h4>
+                                                    <p class="text-sm text-gray-500">{{ getCategoryById(expense.categoryId).name }} • {{ formatDate(expense.date) }}</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center space-x-4">
+                                                <div class="text-right">
+                                                    <p class="font-semibold text-gray-900">\${{ expense.amount.toFixed(2) }}</p>
+                                                    <div class="flex items-center">
+                                                        <span class="text-sm text-gray-500 mr-2">Overall:</span>
+                                                        <span class="text-sm font-medium" :style="{ color: getRatingColor(expense.overallRating) }">
+                                                            {{ expense.overallRating }}/5
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button
+                                                        @click="editExpense(expense)"
+                                                        class="action-button edit-button p-2 rounded-lg border border-gray-300 text-gray-600 hover:border-blue-500 transition-all"
+                                                        title="Edit expense"
+                                                    >
+                                                        <i class="fas fa-edit text-sm"></i>
+                                                    </button>
+                                                    <button
+                                                        @click="deleteExpense(expense)"
+                                                        class="action-button delete-button p-2 rounded-lg border border-gray-300 text-gray-600 hover:border-red-500 transition-all"
+                                                        title="Delete expense"
+                                                    >
+                                                        <i class="fas fa-trash text-sm"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Add Expense View -->
+                            <div v-else-if="currentView === 'add'" key="add" class="max-w-2xl mx-auto">
+                                <div class="bg-white rounded-xl shadow-md p-8">
+                                    <h2 class="text-2xl font-semibold text-gray-900 mb-6">
+                                        <i class="fas fa-plus-circle text-indigo-600 mr-2"></i>
+                                        Add New Expense
+                                    </h2>
+                                    
+                                    <form @submit.prevent="addExpense" class="space-y-6">
+                                        <!-- Basic Information -->
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                    Description
+                                                </label>
+                                                <input 
+                                                    v-model="newExpense.description"
+                                                    type="text" 
+                                                    required
+                                                    placeholder="e.g., Grocery shopping, Movie tickets"
+                                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                >
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                    Amount
+                                                </label>
+                                                <div class="relative">
+                                                    <span class="absolute left-3 top-3 text-gray-500">\$</span>
+                                                    <input 
+                                                        v-model.number="newExpense.amount"
+                                                        type="number" 
+                                                        step="0.01"
+                                                        min="0"
+                                                        required
+                                                        placeholder="0.00"
+                                                        class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                    >
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Category Selection -->
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-3">
+                                                Primary Category
+                                            </label>
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                                                <button
+                                                    v-for="category in categories"
+                                                    :key="category.id"
+                                                    type="button"
+                                                    @click="newExpense.categoryId = category.id"
+                                                    :class="[
+                                                        'category-selector p-4 border border-gray-200 rounded-lg text-center transition-all',
+                                                        newExpense.categoryId === category.id ? 'selected ring-2 ring-offset-2' : ''
+                                                    ]"
+                                                    :style="newExpense.categoryId === category.id ? { ringColor: category.color } : {}"
+                                                >
+                                                    <div 
+                                                        class="w-8 h-8 rounded-lg flex items-center justify-center text-white mx-auto mb-2 transition-transform hover:scale-110"
+                                                        :style="{ backgroundColor: category.color }"
+                                                    >
+                                                        <i :class="category.icon"></i>
+                                                    </div>
+                                                    <span class="text-sm font-medium text-gray-900">{{ category.name }}</span>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Rating System -->
+                                        <div class="bg-gray-50 rounded-lg p-6">
+                                            <h3 class="text-lg font-medium text-gray-900 mb-4">Rate this expense (0-5 scale)</h3>
+                                            <p class="text-sm text-gray-600 mb-6">
+                                                Rate how well this expense fits each category: 0 = doesn't fit at all, 5 = perfect match
+                                            </p>
+                                            
+                                            <div class="space-y-6">
+                                                <div v-for="category in categories" :key="'rating-' + category.id" class="space-y-3">
+                                                    <div class="flex items-center justify-between">
+                                                        <div class="flex items-center">
+                                                            <div 
+                                                                class="w-6 h-6 rounded flex items-center justify-center text-white text-xs mr-3"
+                                                                :style="{ backgroundColor: category.color }"
+                                                            >
+                                                                <i :class="category.icon"></i>
+                                                            </div>
+                                                            <span class="font-medium text-gray-700">{{ category.name }}</span>
+                                                        </div>
+                                                        <div class="flex items-center space-x-3">
+                                                            <input 
+                                                                v-model.number="newExpense.ratings[category.id]"
+                                                                type="number" 
+                                                                min="0" 
+                                                                max="5" 
+                                                                class="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                            >
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex justify-center space-x-2">
+                                                        <button
+                                                            v-for="rating in [0,1,2,3,4,5]"
+                                                            :key="rating"
+                                                            type="button"
+                                                            @click="newExpense.ratings[category.id] = rating"
+                                                            :class="[
+                                                                'rating-button px-3 py-2 rounded-lg text-sm font-medium transition-all',
+                                                                (newExpense.ratings[category.id] || 0) === rating 
+                                                                    ? 'selected text-white shadow-md' 
+                                                                    : 'bg-gray-200 text-gray-600 hover:bg-gray-300 hover:shadow-md'
+                                                            ]"
+                                                            :style="(newExpense.ratings[category.id] || 0) === rating ? { backgroundColor: getRatingColor(rating) } : {}"
+                                                        >
+                                                            {{ rating }}
+                                                        </button>
+                                                    </div>
+                                                    <div class="text-xs text-gray-500 text-center">
+                                                        <span v-if="newExpense.ratings[category.id] === 0">Doesn't fit this category</span>
+                                                        <span v-else-if="newExpense.ratings[category.id] === 1">Very low fit</span>
+                                                        <span v-else-if="newExpense.ratings[category.id] === 2">Low fit</span>
+                                                        <span v-else-if="newExpense.ratings[category.id] === 3">Moderate fit</span>
+                                                        <span v-else-if="newExpense.ratings[category.id] === 4">High fit</span>
+                                                        <span v-else-if="newExpense.ratings[category.id] === 5">Perfect fit</span>
+                                                        <span v-else>Select a rating</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Overall Rating (Auto-calculated) -->
+                                            <div class="mt-6 pt-6 border-t border-gray-200">
+                                                <div class="flex items-center justify-between">
+                                                    <span class="font-semibold text-gray-900">Overall Value Rating (Auto-calculated)</span>
+                                                    <div class="flex items-center space-x-3">
+                                                        <div 
+                                                            class="px-4 py-2 rounded-lg text-white font-semibold"
+                                                            :style="{ backgroundColor: getRatingColor(newExpense.overallRating) }"
+                                                        >
+                                                            {{ newExpense.overallRating }}/5
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <p class="text-xs text-gray-500 mt-2">
+                                                    Automatically calculated as the average of all category ratings
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Submit Button -->
+                                        <div class="flex space-x-4">
+                                            <button 
+                                                type="submit"
+                                                class="flex-1 bg-indigo-600 text-white py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                                            >
+                                                <i class="fas fa-save mr-2"></i>
+                                                Save Expense
+                                            </button>
+                                            <button 
+                                                type="button"
+                                                @click="resetForm"
+                                                class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                                            >
+                                                Reset
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Analytics View -->
+                            <div v-else-if="currentView === 'analytics'" key="analytics">
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                    <!-- Spending by Category -->
+                                    <div class="bg-white rounded-xl shadow-md p-6">
+                                        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                                            <i class="fas fa-chart-pie text-indigo-600 mr-2"></i>
+                                            Spending by Category
+                                        </h3>
+                                        <div class="space-y-4">
+                                            <div v-for="category in categories" :key="'chart-' + category.id" class="flex items-center justify-between">
+                                                <div class="flex items-center">
+                                                    <div 
+                                                        class="w-4 h-4 rounded mr-3"
+                                                        :style="{ backgroundColor: category.color }"
+                                                    ></div>
+                                                    <span class="text-gray-700">{{ category.name }}</span>
+                                                </div>
+                                                <div class="flex items-center space-x-3">
+                                                    <div class="w-32 bg-gray-200 rounded-full h-2">
+                                                        <div 
+                                                            class="h-2 rounded-full transition-all duration-500"
+                                                            :style="{ 
+                                                                backgroundColor: category.color, 
+                                                                width: (getCategoryTotal(category.id) / totalSpending * 100) + '%' 
+                                                            }"
+                                                        ></div>
+                                                    </div>
+                                                    <span class="font-semibold text-gray-900 w-20 text-right">\${{ getCategoryTotal(category.id).toFixed(2) }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-6 pt-4 border-t border-gray-200">
+                                            <div class="flex justify-between items-center">
+                                                <span class="font-semibold text-gray-900">Total Spending</span>
+                                                <span class="text-xl font-bold text-indigo-600">\${{ totalSpending.toFixed(2) }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Value Analysis -->
+                                    <div class="bg-white rounded-xl shadow-md p-6">
+                                        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                                            <i class="fas fa-star text-yellow-500 mr-2"></i>
+                                            Value Analysis
+                                        </h3>
+                                        <div class="space-y-4">
+                                            <div v-for="category in categories" :key="'value-' + category.id" class="flex items-center justify-between">
+                                                <div class="flex items-center">
+                                                    <div 
+                                                        class="w-4 h-4 rounded mr-3"
+                                                        :style="{ backgroundColor: category.color }"
+                                                    ></div>
+                                                    <span class="text-gray-700">{{ category.name }}</span>
+                                                </div>
+                                                <div class="flex items-center space-x-2">
+                                                    <div class="flex">
+                                                        <span 
+                                                            v-for="star in 5" 
+                                                            :key="star"
+                                                            :class="star <= getCategoryAverageRating(category.id) ? 'text-yellow-400' : 'text-gray-300'"
+                                                            class="text-sm"
+                                                        >
+                                                            ★
+                                                        </span>
+                                                    </div>
+                                                    <span class="font-semibold text-gray-900">{{ getCategoryAverageRating(category.id) }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-6 pt-4 border-t border-gray-200">
+                                            <div class="flex justify-between items-center">
+                                                <span class="font-semibold text-gray-900">Overall Average</span>
+                                                <div class="flex items-center space-x-2">
+                                                    <div class="flex">
+                                                        <span 
+                                                            v-for="star in 5" 
+                                                            :key="star"
+                                                            :class="star <= overallAverageRating ? 'text-yellow-400' : 'text-gray-300'"
+                                                        >
+                                                            ★
+                                                        </span>
+                                                    </div>
+                                                    <span class="text-xl font-bold text-indigo-600">{{ overallAverageRating }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Expense History -->
+                                    <div class="lg:col-span-2 bg-white rounded-xl shadow-md p-6">
+                                        <div class="flex items-center justify-between mb-4">
+                                            <h3 class="text-lg font-semibold text-gray-900">
+                                                <i class="fas fa-history text-indigo-600 mr-2"></i>
+                                                Expense History
+                                            </h3>
+                                            <button 
+                                                @click="clearAllData"
+                                                class="text-red-600 hover:text-red-700 text-sm font-medium"
+                                            >
+                                                <i class="fas fa-trash mr-1"></i>
+                                                Clear All Data
+                                            </button>
+                                        </div>
+                                        <div v-if="expenses.length === 0" class="text-center py-8 text-gray-500">
+                                            <i class="fas fa-chart-line text-4xl mb-4"></i>
+                                            <p>No expense data available for analysis.</p>
+                                        </div>
+                                        <div v-else class="overflow-x-auto">
+                                            <table class="w-full">
+                                                <thead>
+                                                    <tr class="border-b border-gray-200">
+                                                        <th class="text-left py-3 px-4 font-medium text-gray-700">Date</th>
+                                                        <th class="text-left py-3 px-4 font-medium text-gray-700">Description</th>
+                                                        <th class="text-left py-3 px-4 font-medium text-gray-700">Category</th>
+                                                        <th class="text-right py-3 px-4 font-medium text-gray-700">Amount</th>
+                                                        <th class="text-center py-3 px-4 font-medium text-gray-700">Rating</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr v-for="expense in expenses" :key="expense.id" class="border-b border-gray-100 hover:bg-gray-50">
+                                                        <td class="py-3 px-4 text-sm text-gray-600">{{ formatDate(expense.date) }}</td>
+                                                        <td class="py-3 px-4 text-sm text-gray-900">{{ expense.description }}</td>
+                                                        <td class="py-3 px-4">
+                                                            <span 
+                                                                class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white"
+                                                                :style="{ backgroundColor: getCategoryById(expense.categoryId).color }"
+                                                            >
+                                                                <i :class="getCategoryById(expense.categoryId).icon + ' mr-1'"></i>
+                                                                {{ getCategoryById(expense.categoryId).name }}
+                                                            </span>
+                                                        </td>
+                                                        <td class="py-3 px-4 text-sm font-semibold text-gray-900 text-right">\${{ expense.amount.toFixed(2) }}</td>
+                                                        <td class="py-3 px-4 text-center">
+                                                            <span 
+                                                                class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                                                                :style="{ 
+                                                                    backgroundColor: getRatingColor(expense.overallRating) + '20',
+                                                                    color: getRatingColor(expense.overallRating)
+                                                                }"
+                                                            >
+                                                                {{ expense.overallRating }}/5
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </transition>
+
+                        <!-- Edit Expense Modal -->
+                        <div v-if="showEditModal" class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop flex items-center justify-center z-50" @click="closeEditModal">
+                            <div class="modal-content bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto" @click.stop>
+                                <div class="flex justify-between items-center mb-6">
+                                    <h2 class="text-xl font-bold text-gray-900">
+                                        <i class="fas fa-edit text-blue-600 mr-2"></i>
+                                        Edit Expense
+                                    </h2>
+                                    <button @click="closeEditModal" class="text-gray-400 hover:text-gray-600 transition-colors">
+                                        <i class="fas fa-times text-xl"></i>
+                                    </button>
+                                </div>
+
+                                <div v-if="editingExpense" class="space-y-6">
+                                    <!-- Description -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                                        <input 
+                                            v-model="editingExpense.description"
+                                            type="text" 
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                            placeholder="e.g., Grocery shopping, Movie tickets"
+                                        >
+                                    </div>
+
+                                    <!-- Amount -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Amount</label>
+                                        <div class="relative">
+                                            <span class="absolute left-3 top-2 text-gray-500">$</span>
+                                            <input 
+                                                v-model.number="editingExpense.amount"
+                                                type="number" 
+                                                step="0.01"
+                                                class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                placeholder="0.00"
+                                            >
+                                        </div>
+                                    </div>
+
+                                    <!-- Category Selection -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-3">Primary Category</label>
+                                        <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
+                                            <button
+                                                v-for="category in categories"
+                                                :key="category.id"
+                                                type="button"
+                                                @click="editingExpense.categoryId = category.id"
+                                                :class="[
+                                                    'category-selector p-3 border border-gray-200 rounded-lg text-center transition-all',
+                                                    editingExpense.categoryId === category.id ? 'selected ring-2 ring-offset-2' : ''
+                                                ]"
+                                                :style="editingExpense.categoryId === category.id ? { ringColor: category.color } : {}"
+                                            >
+                                                <div 
+                                                    class="w-6 h-6 rounded flex items-center justify-center text-white mx-auto mb-1 transition-transform hover:scale-110"
+                                                    :style="{ backgroundColor: category.color }"
+                                                >
+                                                    <i :class="category.icon" class="text-xs"></i>
+                                                </div>
+                                                <span class="text-xs font-medium text-gray-900">{{ category.name }}</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Rating System -->
+                                    <div class="bg-gray-50 rounded-lg p-4">
+                                        <h3 class="text-sm font-medium text-gray-900 mb-3">Update Ratings (0-5 scale)</h3>
+                                        <div class="space-y-4">
+                                            <div v-for="category in categories" :key="'edit-rating-' + category.id" class="space-y-2">
+                                                <div class="flex items-center justify-between">
+                                                    <div class="flex items-center">
+                                                        <div 
+                                                            class="w-5 h-5 rounded flex items-center justify-center text-white text-xs mr-2"
+                                                            :style="{ backgroundColor: category.color }"
+                                                        >
+                                                            <i :class="category.icon"></i>
+                                                        </div>
+                                                        <span class="text-sm font-medium text-gray-700">{{ category.name }}</span>
+                                                    </div>
+                                                    <input 
+                                                        v-model.number="editingExpense.ratings[category.id]"
+                                                        type="number" 
+                                                        min="0" 
+                                                        max="5" 
+                                                        class="w-12 px-1 py-1 border border-gray-300 rounded text-center text-xs focus:ring-1 focus:ring-indigo-500"
+                                                    >
+                                                </div>
+                                                <div class="flex justify-center space-x-1">
+                                                    <button
+                                                        v-for="rating in [0,1,2,3,4,5]"
+                                                        :key="rating"
+                                                        type="button"
+                                                        @click="editingExpense.ratings[category.id] = rating"
+                                                        :class="[
+                                                            'rating-button px-2 py-1 rounded text-xs font-medium transition-all',
+                                                            (editingExpense.ratings[category.id] || 0) === rating 
+                                                                ? 'selected text-white shadow-sm' 
+                                                                : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                                                        ]"
+                                                        :style="(editingExpense.ratings[category.id] || 0) === rating ? { backgroundColor: getRatingColor(rating) } : {}"
+                                                    >
+                                                        {{ rating }}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Action Buttons -->
+                                    <div class="flex space-x-3 pt-4">
+                                        <button
+                                            @click="updateExpense"
+                                            class="flex-1 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                                        >
+                                            <i class="fas fa-save mr-2"></i>
+                                            Update Expense
+                                        </button>
+                                        <button
+                                            @click="closeEditModal"
+                                            class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Delete Confirmation Modal -->
+                        <div v-if="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop flex items-center justify-center z-50" @click="closeDeleteModal">
+                            <div class="modal-content bg-white rounded-lg p-6 w-full max-w-md mx-4" @click.stop>
+                                <div class="text-center">
+                                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                                        <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                                    </div>
+                                    <h3 class="text-lg font-medium text-gray-900 mb-2">Delete Expense</h3>
+                                    <p class="text-sm text-gray-500 mb-6">
+                                        Are you sure you want to delete "<strong>{{ expenseToDelete?.description }}</strong>"? 
+                                        This action cannot be undone.
+                                    </p>
+                                    <div class="flex space-x-3">
+                                        <button
+                                            @click="confirmDelete"
+                                            class="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors font-medium"
+                                        >
+                                            <i class="fas fa-trash mr-2"></i>
+                                            Delete
+                                        </button>
+                                        <button
+                                            @click="closeDeleteModal"
+                                            class="flex-1 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            `,
+            setup() {
+                // Reactive data
+                const currentView = ref('dashboard');
+                const expenses = ref([]);
+                const editingExpense = ref(null);
+                const showEditModal = ref(false);
+                const showDeleteModal = ref(false);
+                const expenseToDelete = ref(null);
+                const categories = ref([
+                    { id: 'selfcare', name: 'Self-Care', icon: 'fas fa-heart', color: '#ec4899' },
+                    { id: 'bonding', name: 'Bonding', icon: 'fas fa-users', color: '#8b5cf6' },
+                    { id: 'entertainment', name: 'Entertainment', icon: 'fas fa-gamepad', color: '#06b6d4' },
+                    { id: 'productivity', name: 'Productivity', icon: 'fas fa-laptop', color: '#10b981' },
+                    { id: 'home', name: 'Home & Maintenance', icon: 'fas fa-home', color: '#f59e0b' }
+                ]);
+
+                const newExpense = ref({
+                    description: '',
+                    amount: 0,
+                    categoryId: '',
+                    ratings: {},
+                    overallRating: 0,
+                    date: new Date().toISOString()
+                });
+
+                // Initialize ratings for new expense
+                const initializeRatings = () => {
+                    const ratings = {};
+                    categories.value.forEach(cat => {
+                        ratings[cat.id] = 0;
+                    });
+                    newExpense.value.ratings = ratings;
+                };
+
+                // Computed properties
+                const recentExpenses = computed(() => {
+                    return expenses.value
+                        .sort((a, b) => new Date(b.date) - new Date(a.date))
+                        .slice(0, 5);
+                });
+
+                const totalSpending = computed(() => {
+                    return expenses.value.reduce((total, expense) => total + expense.amount, 0);
+                });
+
+                const overallAverageRating = computed(() => {
+                    if (expenses.value.length === 0) return 0;
+                    const total = expenses.value.reduce((sum, expense) => sum + expense.overallRating, 0);
+                    return (total / expenses.value.length).toFixed(1);
+                });
+
+                // Auto-calculate overall rating from category ratings
+                const calculatedOverallRating = computed(() => {
+                    const ratings = Object.values(newExpense.value.ratings);
+                    if (ratings.length === 0) return 0;
+                    const sum = ratings.reduce((total, rating) => total + rating, 0);
+                    return Math.round(sum / ratings.length);
+                });
+
+                // Watch for changes in category ratings and update overall rating
+                watch(() => newExpense.value.ratings, () => {
+                    newExpense.value.overallRating = calculatedOverallRating.value;
+                }, { deep: true });
+
+                // Methods
+                const getCategoryById = (id) => {
+                    return categories.value.find(cat => cat.id === id) || categories.value[0];
+                };
+
+                const getCategoryTotal = (categoryId) => {
+                    return expenses.value
+                        .filter(expense => expense.categoryId === categoryId)
+                        .reduce((total, expense) => total + expense.amount, 0);
+                };
+
+                const getCategoryExpenseCount = (categoryId) => {
+                    return expenses.value.filter(expense => expense.categoryId === categoryId).length;
+                };
+
+                const getCategoryAverageRating = (categoryId) => {
+                    const categoryExpenses = expenses.value.filter(expense => expense.categoryId === categoryId);
+                    if (categoryExpenses.length === 0) return 0;
+                    
+                    const totalRating = categoryExpenses.reduce((sum, expense) => {
+                        return sum + (expense.ratings[categoryId] || 0);
+                    }, 0);
+                    
+                    return (totalRating / categoryExpenses.length).toFixed(1);
+                };
+
+                const getRatingColor = (rating) => {
+                    const colors = {
+                        0: '#6b7280', // gray for 0 (doesn't fit category)
+                        1: '#ef4444', // red for 1 (very low)
+                        2: '#f97316', // orange for 2 (low)
+                        3: '#eab308', // yellow for 3 (moderate)
+                        4: '#22c55e', // green for 4 (high)
+                        5: '#10b981'  // emerald for 5 (excellent)
+                    };
+                    return colors[rating] || colors[0];
+                };
+
+                const formatDate = (dateString) => {
+                    return new Date(dateString).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                };
+
+                const addExpense = () => {
+    if (!newExpense.value.description || !newExpense.value.amount || !newExpense.value.categoryId) {
+        alert('Please fill in all required fields');
+        return;
+    }
+
+    const ratings = Object.values(newExpense.value.ratings).filter(r => r > 0);
+const overall = ratings.length > 0 ? Math.round(ratings.reduce((a, b) => a + b, 0) / ratings.length) : 0;
+
+const expense = {
+    id: Date.now().toString(),
+    ...newExpense.value,
+    overallRating: overall,
+    date: new Date().toISOString()
+};
+    // Add to the top of the list
+    expenses.value.unshift(expense);
+    saveToLocalStorage();
+    resetForm();
+    currentView.value = 'dashboard';
+};
+
+
+                const editExpense = (expense) => {
+                    editingExpense.value = { ...expense };
+                    showEditModal.value = true;
+                };
+
+                const updateExpense = () => {
+                    if (!editingExpense.value.description || !editingExpense.value.amount || !editingExpense.value.categoryId) {
+                        alert('Please fill in all required fields');
+                        return;
+                    }
+
+                    const index = expenses.value.findIndex(e => e.id === editingExpense.value.id);
+                    if (index !== -1) {
+                        expenses.value[index] = { ...editingExpense.value };
+                        saveToLocalStorage();
+                    }
+                    closeEditModal();
+                };
+
+                const deleteExpense = (expense) => {
+                    expenseToDelete.value = expense;
+                    showDeleteModal.value = true;
+                };
+
+                const confirmDelete = () => {
+                    if (expenseToDelete.value) {
+                        expenses.value = expenses.value.filter(e => e.id !== expenseToDelete.value.id);
+                        saveToLocalStorage();
+                    }
+                    closeDeleteModal();
+                };
+
+                const closeEditModal = () => {
+                    showEditModal.value = false;
+                    editingExpense.value = null;
+                };
+
+                const closeDeleteModal = () => {
+                    showDeleteModal.value = false;
+                    expenseToDelete.value = null;
+                };
+
+                const resetForm = () => {
+                    newExpense.value = {
+                        description: '',
+                        amount: 0,
+                        categoryId: '',
+                        ratings: {},
+                        overallRating: 0,
+                        date: new Date().toISOString()
+                    };
+                    initializeRatings();
+                };
+
+                const clearAllData = () => {
+                    if (confirm('Are you sure you want to clear all expense data? This action cannot be undone.')) {
+                        expenses.value = [];
+                        saveToLocalStorage();
+                    }
+                };
+
+                const saveToLocalStorage = () => {
+                    localStorage.setItem('familySpendingData', JSON.stringify(expenses.value));
+                };
+
+                const loadFromLocalStorage = () => {
+                    const saved = localStorage.getItem('familySpendingData');
+                    if (saved) {
+                        expenses.value = JSON.parse(saved);
+                    }
+                };
+
+                // Lifecycle
+                onMounted(() => {
+                    initializeRatings();
+                    loadFromLocalStorage();
+                });
+
+                // Watch for changes and save to localStorage
+                watch(expenses, saveToLocalStorage, { deep: true });
+
+                return {
+                    currentView,
+                    expenses,
+                    categories,
+                    newExpense,
+                    editingExpense,
+                    showEditModal,
+                    showDeleteModal,
+                    expenseToDelete,
+                    recentExpenses,
+                    totalSpending,
+                    overallAverageRating,
+                    calculatedOverallRating,
+                    getCategoryById,
+                    getCategoryTotal,
+                    getCategoryExpenseCount,
+                    getCategoryAverageRating,
+                    getRatingColor,
+                    formatDate,
+                    addExpense,
+                    editExpense,
+                    updateExpense,
+                    deleteExpense,
+                    confirmDelete,
+                    closeEditModal,
+                    closeDeleteModal,
+                    resetForm,
+                    clearAllData
+                };
+            }
+        };
+
+        createApp({
+            components: {
+                FamilySpendingTracker
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
+
