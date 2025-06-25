@@ -92,169 +92,6 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.7; }
         }
-        
-        /* Enhanced mobile responsiveness */
-        @media (max-width: 640px) {
-            .category-card {
-                padding: 1rem;
-                margin-bottom: 1rem;
-            }
-            .rating-button {
-                min-width: 2rem;
-                min-height: 2rem;
-                font-size: 0.75rem;
-                padding: 0.25rem 0.5rem;
-            }
-            .expense-item {
-                padding: 0.75rem;
-                margin-bottom: 0.5rem;
-            }
-            .modal-content {
-                margin: 0.5rem;
-                max-height: 90vh;
-                overflow-y: auto;
-            }
-            .category-selector {
-                padding: 0.75rem;
-                min-height: 4rem;
-            }
-            .nav-button {
-                padding: 0.5rem 1rem;
-                font-size: 0.875rem;
-            }
-        }
-        
-        /* Enhanced visual feedback */
-        .rating-button {
-            position: relative;
-            overflow: hidden;
-        }
-        .rating-button::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: width 0.3s ease, height 0.3s ease;
-        }
-        .rating-button:active::before {
-            width: 100%;
-            height: 100%;
-        }
-        
-        .category-selector {
-            position: relative;
-            overflow: hidden;
-        }
-        .category-selector::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
-            transform: translateX(-100%);
-            transition: transform 0.6s ease;
-        }
-        .category-selector:hover::after {
-            transform: translateX(100%);
-        }
-        
-        /* Touch device optimizations */
-        @media (hover: none) and (pointer: coarse) {
-            .rating-button:hover {
-                transform: none;
-                box-shadow: none;
-            }
-            .rating-button:active {
-                transform: scale(0.95);
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-            }
-            .category-selector:hover {
-                transform: none;
-                box-shadow: none;
-            }
-            .category-selector:active {
-                transform: scale(0.98);
-                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-            }
-            .expense-item:hover {
-                transform: none;
-                background: none;
-            }
-            .expense-item:active {
-                background: rgba(99, 102, 241, 0.05);
-                transform: scale(0.99);
-            }
-        }
-        
-        /* Improved focus states for accessibility */
-        .rating-button:focus {
-            outline: 2px solid #6366f1;
-            outline-offset: 2px;
-        }
-        .category-selector:focus {
-            outline: 2px solid #6366f1;
-            outline-offset: 2px;
-        }
-        .nav-button:focus {
-            outline: 2px solid #6366f1;
-            outline-offset: 2px;
-        }
-        
-        /* Enhanced button styles for save/reset */
-        .submit-button {
-            min-height: 44px; /* Minimum touch target size */
-            position: relative;
-            overflow: hidden;
-        }
-        .submit-button:disabled {
-            transform: none !important;
-        }
-        .submit-button::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: width 0.3s ease, height 0.3s ease;
-        }
-        .submit-button:active::before {
-            width: 100%;
-            height: 100%;
-        }
-        
-        /* Button loading state */
-        .submit-button.loading {
-            pointer-events: none;
-        }
-        .submit-button.loading::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 16px;
-            height: 16px;
-            margin: -8px 0 0 -8px;
-            border: 2px solid transparent;
-            border-top: 2px solid currentColor;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -274,47 +111,47 @@
                             <div class="flex items-center justify-between">
                                 <h1 class="text-2xl font-bold text-gray-900">
                                     <i class="fas fa-chart-pie text-indigo-600 mr-2"></i>
-                                    Spend Less Tracker
+                                    Rate Spending Less Tracker
                                 </h1>
-                                <div class="flex flex-wrap gap-2 sm:space-x-2 sm:gap-0">
+                                <div class="flex space-x-2">
                                     <button 
-                                        @click="currentView = 'dashboard'"
-                                        :class="[
-                                            'nav-button px-3 sm:px-4 py-2 rounded-lg font-medium transition-all transform',
-                                            currentView === 'dashboard' 
-                                                ? 'bg-indigo-600 text-white shadow-lg scale-105' 
-                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:shadow-md'
-                                        ]"
-                                    >
-                                        <i class="fas fa-tachometer-alt mr-1"></i>
-                                        <span class="hidden sm:inline">Dashboard</span>
-                                        <span class="sm:hidden">📊</span>
-                                    </button>
-                                    <button 
-                                        @click="currentView = 'add'"
-                                        :class="[
-                                            'nav-button px-3 sm:px-4 py-2 rounded-lg font-medium transition-all transform',
-                                            currentView === 'add' 
-                                                ? 'bg-indigo-600 text-white shadow-lg scale-105' 
-                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:shadow-md'
-                                        ]"
-                                    >
-                                        <i class="fas fa-plus mr-1"></i>
-                                        <span class="hidden sm:inline">Add Expense</span>
-                                        <span class="sm:hidden">➕</span>
-                                    </button>
-                                    <button 
-                                        @click="currentView = 'analytics'"
-                                        :class="[
-                                            'nav-button px-3 sm:px-4 py-2 rounded-lg font-medium transition-all transform',
-                                            currentView === 'analytics' 
-                                                ? 'bg-indigo-600 text-white shadow-lg scale-105' 
-                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:shadow-md'
-                                        ]"
-                                    >
-                                        <i class="fas fa-chart-bar mr-1"></i>
-                                        <span class="hidden sm:inline">Analytics</span>
-                                        <span class="sm:hidden">📈</span>
+  @click="currentView = 'dashboard'"
+  :class="[
+    'px-4 py-2 rounded-lg font-medium transition-all',
+    currentView === 'dashboard' 
+      ? 'bg-indigo-600 text-white shadow-md ring-2 ring-indigo-400' 
+      : 'bg-gray-100 text-gray-700 hover:bg-indigo-100 hover:text-indigo-700'
+  ]"
+>
+  <i class="fas fa-tachometer-alt mr-1"></i>
+  Dashboard
+</button>
+
+<button 
+  @click="currentView = 'add'"
+  :class="[
+    'px-4 py-2 rounded-lg font-medium transition-all',
+    currentView === 'add' 
+      ? 'bg-indigo-600 text-white shadow-md ring-2 ring-indigo-400' 
+      : 'bg-gray-100 text-gray-700 hover:bg-indigo-100 hover:text-indigo-700'
+  ]"
+>
+  <i class="fas fa-plus mr-1"></i>
+  Add Expense
+</button>
+
+<button 
+  @click="currentView = 'analytics'"
+  :class="[
+    'px-4 py-2 rounded-lg font-medium transition-all',
+    currentView === 'analytics' 
+      ? 'bg-indigo-600 text-white shadow-md ring-2 ring-indigo-400' 
+      : 'bg-gray-100 text-gray-700 hover:bg-indigo-100 hover:text-indigo-700'
+  ]"
+>
+  <i class="fas fa-chart-bar mr-1"></i>
+  Analytics
+</button>
                                     </button>
                                 </div>
                             </div>
@@ -327,25 +164,24 @@
                         <transition name="fade" mode="out-in">
                             <div v-if="currentView === 'dashboard'" key="dashboard">
                                 <!-- Categories Overview -->
-                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6 mb-8">
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
                                     <div 
                                         v-for="category in categories" 
                                         :key="category.id"
-                                        class="category-card bg-white rounded-xl p-4 sm:p-6 shadow-md border-l-4 cursor-pointer transform transition-all duration-300 hover:shadow-xl"
+                                        class="category-card bg-white rounded-xl p-6 shadow-md border-l-4"
                                         :style="{ borderLeftColor: category.color }"
-                                        @click="currentView = 'add'; newExpense.categoryId = category.id"
                                     >
-                                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4">
-                                            <div class="flex items-center mb-2 sm:mb-0">
+                                        <div class="flex items-center justify-between mb-4">
+                                            <div class="flex items-center">
                                                 <div 
-                                                    class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center text-white text-lg sm:text-xl transition-transform duration-300 hover:scale-110"
+                                                    class="w-12 h-12 rounded-lg flex items-center justify-center text-white text-xl"
                                                     :style="{ backgroundColor: category.color }"
                                                 >
                                                     <i :class="category.icon"></i>
                                                 </div>
                                                 <div class="ml-3">
-                                                    <h3 class="font-semibold text-gray-900 text-sm sm:text-base">{{ category.name }}</h3>
-                                                    <p class="text-xs sm:text-sm text-gray-500">{{ getCategoryExpenseCount(category.id) }} expenses</p>
+                                                    <h3 class="font-semibold text-gray-900">{{ category.name }}</h3>
+                                                    <p class="text-sm text-gray-500">{{ getCategoryExpenseCount(category.id) }} expenses</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -458,7 +294,7 @@
                                             </div>
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                                                    Amount
+                                                    Budget Amount
                                                 </label>
                                                 <div class="relative">
                                                     <span class="absolute left-3 top-3 text-gray-500">\$</span>
@@ -466,9 +302,9 @@
                                                         v-model.number="newExpense.amount"
                                                         type="number" 
                                                         step="0.01"
-                                                        min="0"
+                                                        min="1"
                                                         required
-                                                        placeholder="0.00"
+                                                        placeholder="Enter budget amount"
                                                         class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                                     >
                                                 </div>
@@ -480,34 +316,32 @@
                                             <label class="block text-sm font-medium text-gray-700 mb-3">
                                                 Primary Category
                                             </label>
-                                            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                                                 <button
                                                     v-for="category in categories"
                                                     :key="category.id"
                                                     type="button"
                                                     @click="newExpense.categoryId = category.id"
                                                     :class="[
-                                                        'category-selector p-3 sm:p-4 border border-gray-200 rounded-lg text-center transition-all transform duration-300',
-                                                        newExpense.categoryId === category.id 
-                                                            ? 'selected ring-2 ring-offset-2 scale-105 shadow-lg' 
-                                                            : 'hover:shadow-md hover:scale-102 active:scale-98'
+                                                        'category-selector p-4 border border-gray-200 rounded-lg text-center transition-all',
+                                                        newExpense.categoryId === category.id ? 'selected ring-2 ring-offset-2' : ''
                                                     ]"
                                                     :style="newExpense.categoryId === category.id ? { ringColor: category.color } : {}"
                                                 >
                                                     <div 
-                                                        class="w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-white mx-auto mb-1 sm:mb-2 transition-transform duration-300 hover:scale-110"
+                                                        class="w-8 h-8 rounded-lg flex items-center justify-center text-white mx-auto mb-2 transition-transform hover:scale-110"
                                                         :style="{ backgroundColor: category.color }"
                                                     >
-                                                        <i :class="category.icon" class="text-xs sm:text-sm"></i>
+                                                        <i :class="category.icon"></i>
                                                     </div>
-                                                    <span class="text-xs sm:text-sm font-medium text-gray-900">{{ category.name }}</span>
+                                                    <span class="text-sm font-medium text-gray-900">{{ category.name }}</span>
                                                 </button>
                                             </div>
                                         </div>
 
-                                        <!-- Ra                                            <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                                                Rate this expense (1-5 scale)
-                                            </h3>
+                                        <!-- Rating System -->
+                                        <div class="bg-gray-50 rounded-lg p-6">
+                                            <h3 class="text-lg font-medium text-gray-900 mb-4">Rate this expense (1-5 scale)</h3>
                                             <p class="text-sm text-gray-600 mb-6">
                                                 Rate how well this expense fits each category: 1 = doesn't fit at all, 5 = perfect match
                                             </p>
@@ -524,40 +358,31 @@
                                                             </div>
                                                             <span class="font-medium text-gray-700">{{ category.name }}</span>
                                                         </div>
-                                                        <div class="flex items-center space-x-3">
-                                                            <input 
-                                                                v-model.number="newExpense.ratings[category.id]"
-                                                                type="number" 
-                                                                min="1" 
-                                                                max="5" 
-                                                                class="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                                            >
-                                                        </div>
                                                     </div>
-                                                    <div class="flex justify-center space-x-1 sm:space-x-2">
+                                                    <div class="flex justify-center space-x-2">
                                                         <button
                                                             v-for="rating in [1,2,3,4,5]"
                                                             :key="rating"
                                                             type="button"
                                                             @click="newExpense.ratings[category.id] = rating"
                                                             :class="[
-                                                                'rating-button px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all transform',
-                                                                (newExpense.ratings[category.id] || 1) === rating 
-                                                                    ? 'selected text-white shadow-lg scale-110 ring-2 ring-white ring-opacity-50' 
-                                                                    : 'bg-gray-200 text-gray-600 hover:bg-gray-300 hover:shadow-md hover:scale-105 active:scale-95'
+                                                                'rating-button px-3 py-2 rounded-lg text-sm font-medium transition-all',
+                                                                (newExpense.ratings[category.id] || 0) === rating 
+                                                                    ? 'selected text-white shadow-md' 
+                                                                    : 'bg-gray-200 text-gray-600 hover:bg-gray-300 hover:shadow-md'
                                                             ]"
-                                                            :style="(newExpense.ratings[category.id] || 1) === rating ? { backgroundColor: getRatingColor(rating) } : {}"
+                                                            :style="(newExpense.ratings[category.id] || 0) === rating ? { backgroundColor: getRatingColor(rating) } : {}"
                                                         >
                                                             {{ rating }}
                                                         </button>
                                                     </div>
-                                                    <div class="text-xs text-gray-500 text-center mt-1">
-                                                        <span v-if="newExpense.ratings[category.id] === 1">Doesn't fit at all</span>
-                                                        <span v-else-if="newExpense.ratings[category.id] === 2">Low fit</span>
-                                                        <span v-else-if="newExpense.ratings[category.id] === 3">Moderate fit</span>
-                                                        <span v-else-if="newExpense.ratings[category.id] === 4">High fit</span>
-                                                        <span v-else-if="newExpense.ratings[category.id] === 5">Perfect match</span>
-                                                        <span v-else>Select a rating</span>
+                                                    <div class="text-xs text-gray-500 text-center">
+                                                <span v-if="newExpense.ratings[category.id] === 1">Very low fit</span>
+                                                <span v-else-if="newExpense.ratings[category.id] === 2">Low fit</span>
+                                                <span v-else-if="newExpense.ratings[category.id] === 3">Moderate fit</span>
+                                                <span v-else-if="newExpense.ratings[category.id] === 4">High fit</span>
+                                                <span v-else-if="newExpense.ratings[category.id] === 5">Perfect fit</span>
+                                                <span v-else>Select a rating</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -581,27 +406,21 @@
                                             </div>
                                         </div>
 
-                                        <!-- Submit Buttons -->
-                                        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-6">
+                                        <!-- Submit Button -->
+                                        <div class="flex space-x-4">
                                             <button 
                                                 type="submit"
-                                                class="flex-1 bg-indigo-600 text-white py-3 sm:py-3 px-4 sm:px-6 rounded-lg hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-200 focus:outline-none transition-all duration-200 font-medium text-sm sm:text-base transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-                                                :disabled="!newExpense.description || !newExpense.amount || !newExpense.categoryId"
-                                                aria-label="Save expense to your spending tracker"
+                                                class="flex-1 bg-indigo-600 text-white py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors font-medium"
                                             >
-                                                <i class="fas fa-save mr-2" aria-hidden="true"></i>
-                                                <span class="hidden sm:inline">Save Expense</span>
-                                                <span class="sm:hidden">Save</span>
+                                                <i class="fas fa-save mr-2"></i>
+                                                Save Expense
                                             </button>
                                             <button 
                                                 type="button"
                                                 @click="resetForm"
-                                                class="px-4 sm:px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-gray-400 focus:ring-4 focus:ring-gray-200 focus:outline-none transition-all duration-200 font-medium text-sm sm:text-base transform hover:scale-[1.02] active:scale-[0.98]"
-                                                aria-label="Reset form and clear all fields"
+                                                class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                                             >
-                                                <i class="fas fa-undo mr-2" aria-hidden="true"></i>
-                                                <span class="hidden sm:inline">Reset Form</span>
-                                                <span class="sm:hidden">Reset</span>
+                                                Reset
                                             </button>
                                         </div>
                                     </form>
@@ -723,7 +542,7 @@
                                                         <th class="text-left py-3 px-4 font-medium text-gray-700">Date</th>
                                                         <th class="text-left py-3 px-4 font-medium text-gray-700">Description</th>
                                                         <th class="text-left py-3 px-4 font-medium text-gray-700">Category</th>
-                                                        <th class="text-right py-3 px-4 font-medium text-gray-700">Amount</th>
+                                                        <th class="text-right py-3 px-4 font-medium text-gray-700">Budget Amount</th>
                                                         <th class="text-center py-3 px-4 font-medium text-gray-700">Rating</th>
                                                     </tr>
                                                 </thead>
@@ -788,7 +607,7 @@
 
                                     <!-- Amount -->
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Amount</label>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Budget Amount</label>
                                         <div class="relative">
                                             <span class="absolute left-3 top-2 text-gray-500">$</span>
                                             <input 
@@ -845,14 +664,14 @@
                                                     <input 
                                                         v-model.number="editingExpense.ratings[category.id]"
                                                         type="number" 
-                                                        min="0" 
+                                                        min="1" 
                                                         max="5" 
                                                         class="w-12 px-1 py-1 border border-gray-300 rounded text-center text-xs focus:ring-1 focus:ring-indigo-500"
                                                     >
                                                 </div>
                                                 <div class="flex justify-center space-x-1">
                                                     <button
-                                                        v-for="rating in [0,1,2,3,4,5]"
+                                                        v-for="rating in [1,2,3,4,5]"
                                                         :key="rating"
                                                         type="button"
                                                         @click="editingExpense.ratings[category.id] = rating"
@@ -949,11 +768,13 @@
                     date: new Date().toISOString()
                 });
 
-                // Initialize ratings for all categories with default value 1
+                // Initialize ratings for new expense
                 const initializeRatings = () => {
-                    categories.value.forEach(category => {
-                        newExpense.value.ratings[category.id] = 1;
+                    const ratings = {};
+                    categories.value.forEach(cat => {
+                        ratings[cat.id] = 0;
                     });
+                    newExpense.value.ratings = ratings;
                 };
 
                 // Computed properties
@@ -975,11 +796,11 @@
 
                 // Auto-calculate overall rating from category ratings
                 const calculatedOverallRating = computed(() => {
-                    const ratings = Object.values(newExpense.value.ratings);
-                    if (ratings.length === 0) return 0;
-                    const sum = ratings.reduce((total, rating) => total + rating, 0);
-                    return Math.round(sum / ratings.length);
-                });
+    const ratings = Object.values(newExpense.value.ratings).filter(r => r > 0);
+    if (ratings.length === 0) return 0;
+    const sum = ratings.reduce((total, rating) => total + rating, 0);
+    return Math.round(sum / ratings.length);
+});
 
                 // Watch for changes in category ratings and update overall rating
                 watch(() => newExpense.value.ratings, () => {
@@ -1006,7 +827,7 @@
                     if (categoryExpenses.length === 0) return 0;
                     
                     const totalRating = categoryExpenses.reduce((sum, expense) => {
-                        return sum + (expense.ratings[categoryId] || 1);
+                        return sum + (expense.ratings[categoryId] || 0);
                     }, 0);
                     
                     return (totalRating / categoryExpenses.length).toFixed(1);
@@ -1014,13 +835,14 @@
 
                 const getRatingColor = (rating) => {
                     const colors = {
+                        0: '#6b7280', // gray for 0 (doesn't fit category)
                         1: '#ef4444', // red for 1 (very low)
                         2: '#f97316', // orange for 2 (low)
                         3: '#eab308', // yellow for 3 (moderate)
                         4: '#22c55e', // green for 4 (high)
                         5: '#10b981'  // emerald for 5 (excellent)
                     };
-                    return colors[rating] || colors[1];
+                    return colors[rating] || colors[0];
                 };
 
                 const formatDate = (dateString) => {
@@ -1032,22 +854,27 @@
                 };
 
                 const addExpense = () => {
-                    if (!newExpense.value.description || !newExpense.value.amount || !newExpense.value.categoryId) {
-                        alert('Please fill in all required fields');
-                        return;
-                    }
+    if (!newExpense.value.description || !newExpense.value.amount || !newExpense.value.categoryId) {
+        alert('Please fill in all required fields');
+        return;
+    }
 
-                    const expense = {
-                        id: Date.now().toString(),
-                        ...newExpense.value,
-                        date: new Date().toISOString()
-                    };
+    const ratings = Object.values(newExpense.value.ratings).filter(r => r > 0);
+const overall = ratings.length > 0 ? Math.round(ratings.reduce((a, b) => a + b, 0) / ratings.length) : 0;
 
-                    expenses.value.push(expense);
-                    saveToLocalStorage();
-                    resetForm();
-                    currentView.value = 'dashboard';
-                };
+const expense = {
+    id: Date.now().toString(),
+    ...newExpense.value,
+    overallRating: overall,
+    date: new Date().toISOString()
+};
+    // Add to the top of the list
+    expenses.value.unshift(expense);
+    saveToLocalStorage();
+    resetForm();
+    currentView.value = 'dashboard';
+};
+
 
                 const editExpense = (expense) => {
                     editingExpense.value = { ...expense };
