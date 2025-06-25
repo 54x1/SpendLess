@@ -107,56 +107,105 @@
                 <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
                     <!-- Header -->
                     <header class="bg-white shadow-sm border-b border-gray-200">
-                        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                            <div class="flex items-center justify-between">
-                                <h1 class="text-2xl font-bold text-gray-900">
-                                    <i class="fas fa-chart-pie text-indigo-600 mr-2"></i>
-                                    Spend Less Tracker
-                                </h1>
-                                <div class="flex space-x-2">
-                                    <button 
-  @click="currentView = 'dashboard'"
-  :class="[
-    'px-4 py-2 rounded-lg font-medium transition-all',
-    currentView === 'dashboard' 
-      ? 'bg-indigo-600 text-white shadow-md ring-2 ring-indigo-400' 
-      : 'bg-gray-100 text-gray-700 hover:bg-indigo-100 hover:text-indigo-700'
-  ]"
->
-  <i class="fas fa-tachometer-alt mr-1"></i>
-  Dashboard
-</button>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div class="flex items-center justify-between">
+      <!-- Logo + Title -->
+      <h1 class="text-2xl font-bold text-gray-900 flex items-center">
+        <i class="fas fa-chart-pie text-indigo-600 mr-2"></i>
+        Spend Less Tracker
+      </h1>
 
-<button 
-  @click="currentView = 'add'"
-  :class="[
-    'px-4 py-2 rounded-lg font-medium transition-all',
-    currentView === 'add' 
-      ? 'bg-indigo-600 text-white shadow-md ring-2 ring-indigo-400' 
-      : 'bg-gray-100 text-gray-700 hover:bg-indigo-100 hover:text-indigo-700'
-  ]"
->
-  <i class="fas fa-plus mr-1"></i>
-  Add Expense
-</button>
+      <!-- Mobile Menu Toggle Button -->
+      <button
+        @click="showMobileMenu = !showMobileMenu"
+        class="sm:hidden text-gray-600 hover:text-indigo-600 focus:outline-none"
+      >
+        <i class="fas fa-bars text-2xl"></i>
+      </button>
 
-<button 
-  @click="currentView = 'analytics'"
-  :class="[
-    'px-4 py-2 rounded-lg font-medium transition-all',
-    currentView === 'analytics' 
-      ? 'bg-indigo-600 text-white shadow-md ring-2 ring-indigo-400' 
-      : 'bg-gray-100 text-gray-700 hover:bg-indigo-100 hover:text-indigo-700'
-  ]"
->
-  <i class="fas fa-chart-bar mr-1"></i>
-  Analytics
-</button>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </header>
+      <!-- Desktop Navigation -->
+      <div class="hidden sm:flex space-x-2">
+        <button
+          @click="currentView = 'dashboard'"
+          :class="[
+            'px-4 py-2 rounded-lg font-medium transition-all',
+            currentView === 'dashboard'
+              ? 'bg-indigo-600 text-white shadow-md ring-2 ring-indigo-400'
+              : 'bg-gray-100 text-gray-700 hover:bg-indigo-100 hover:text-indigo-700'
+          ]"
+        >
+          <i class="fas fa-tachometer-alt mr-1"></i>
+          Dashboard
+        </button>
+        <button
+          @click="currentView = 'add'"
+          :class="[
+            'px-4 py-2 rounded-lg font-medium transition-all',
+            currentView === 'add'
+              ? 'bg-indigo-600 text-white shadow-md ring-2 ring-indigo-400'
+              : 'bg-gray-100 text-gray-700 hover:bg-indigo-100 hover:text-indigo-700'
+          ]"
+        >
+          <i class="fas fa-plus mr-1"></i>
+          Add Expense
+        </button>
+        <button
+          @click="currentView = 'analytics'"
+          :class="[
+            'px-4 py-2 rounded-lg font-medium transition-all',
+            currentView === 'analytics'
+              ? 'bg-indigo-600 text-white shadow-md ring-2 ring-indigo-400'
+              : 'bg-gray-100 text-gray-700 hover:bg-indigo-100 hover:text-indigo-700'
+          ]"
+        >
+          <i class="fas fa-chart-bar mr-1"></i>
+          Analytics
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Dropdown Menu -->
+    <div v-if="showMobileMenu" class="sm:hidden mt-4 space-y-2">
+      <button
+        @click="currentView = 'dashboard'; showMobileMenu = false"
+        :class="[
+          'w-full text-left px-4 py-2 rounded-lg font-medium transition-all',
+          currentView === 'dashboard'
+            ? 'bg-indigo-600 text-white shadow-md ring-2 ring-indigo-400'
+            : 'bg-gray-100 text-gray-700 hover:bg-indigo-100 hover:text-indigo-700'
+        ]"
+      >
+        <i class="fas fa-tachometer-alt mr-1"></i>
+        Dashboard
+      </button>
+      <button
+        @click="currentView = 'add'; showMobileMenu = false"
+        :class="[
+          'w-full text-left px-4 py-2 rounded-lg font-medium transition-all',
+          currentView === 'add'
+            ? 'bg-indigo-600 text-white shadow-md ring-2 ring-indigo-400'
+            : 'bg-gray-100 text-gray-700 hover:bg-indigo-100 hover:text-indigo-700'
+        ]"
+      >
+        <i class="fas fa-plus mr-1"></i>
+        Add Expense
+      </button>
+      <button
+        @click="currentView = 'analytics'; showMobileMenu = false"
+        :class="[
+          'w-full text-left px-4 py-2 rounded-lg font-medium transition-all',
+          currentView === 'analytics'
+            ? 'bg-indigo-600 text-white shadow-md ring-2 ring-indigo-400'
+            : 'bg-gray-100 text-gray-700 hover:bg-indigo-100 hover:text-indigo-700'
+        ]"
+      >
+        <i class="fas fa-chart-bar mr-1"></i>
+        Analytics
+      </button>
+    </div>
+  </div>
+</header>
+
 
                     <!-- Main Content -->
                     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -744,7 +793,7 @@
                 </div>
             `,
             setup() {
-                // Reactive data
+                const showMobileMenu = ref(false);
                 const currentView = ref('dashboard');
                 const expenses = ref([]);
                 const editingExpense = ref(null);
@@ -958,6 +1007,7 @@ const expense = {
                 watch(expenses, saveToLocalStorage, { deep: true });
 
                 return {
+                    showMobileMenu,
                     currentView,
                     expenses,
                     categories,
